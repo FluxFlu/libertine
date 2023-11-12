@@ -1,14 +1,18 @@
 {
   "name": "libertine",
+  "author": "Missy \"FluxFlu\"",
   "version": "1.0.0",
   "description": "Mommy's here to support you when running... Everything? ❤️",
   "main": "src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FluxFlu/libertine.git"
+  },
   "scripts": {
     "start": "node ./src/index.js"
   },
   "bin": {
     "libertine": "./src/index.js"
   },
-  "author": "Missy \"FluxFlu\"",
   "license": "GPL-3.0"
 }
