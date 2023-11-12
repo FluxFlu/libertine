@@ -1,0 +1,14 @@
+{
+  "name": "libertine",
+  "version": "1.0.0",
+  "description": "Mommy's here to support you when running... Everything? ❤️",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node ./src/index.js"
+  },
+  "bin": {
+    "libertine": "./src/index.js"
+  },
+  "author": "Missy \"FluxFlu\"",
+  "license": "GPL-3.0"
+}
