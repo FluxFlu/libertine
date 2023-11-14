@@ -64,7 +64,7 @@ function runCommand(command, args) {
     if (cmd.error) {
         // status = 1;
         console.log(cmd.error.toLocaleString())
-    } else if (cmd.output)
+    } if (cmd.output)
         console.log(cmd.output[1].toLocaleString())
     let response = selectResponse(status ? "negative" : "positive");
     console.log(substituteValues(response));
