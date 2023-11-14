@@ -59,14 +59,20 @@ function substituteValues(response) {
 }
 
 function runCommand(command, args) {
-    const cmd = child_process.spawnSync(command, args, { shell: true, windowsHide: true });
-    const status = cmd.status;
-    if (cmd.error)
-        console.log(cmd.error.toLocaleString())
-    if (cmd.output)
-        cmd.output.forEach(e => e && console.log(e.toLocaleString()))
-    let response = selectResponse(status ? "negative" : "positive");
-    console.log(substituteValues(response));
+    const cmd = child_process.spawn(command, args, { shell: true, windowsHide: true });
+
+    cmd.stdout.on("data", message => {
+        console.log(message.toLocaleString());
+    })
+
+    cmd.stderr.on("data", message => {
+        console.log(message.toLocaleString());
+    })
+
+    cmd.addListener("close", message => {
+        let response = selectResponse(+message.toString() ? "negative" : "positive");
+        console.log(substituteValues(response));
+    });
 }
 
 function displayHelp() {
@@ -87,4 +93,5 @@ function displayHelp() {
 process.argv.splice(0, 2);
 if (process.argv.length == 0 || process.argv[0] == '--help')
     displayHelp();
+
 runCommand(process.argv.shift(), process.argv);
