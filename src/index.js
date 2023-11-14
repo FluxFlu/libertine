@@ -61,11 +61,10 @@ function substituteValues(response) {
 function runCommand(command, args) {
     const cmd = child_process.spawnSync(command, args, { shell: true, windowsHide: true });
     const status = cmd.status;
-    if (cmd.error) {
-        // status = 1;
+    if (cmd.error)
         console.log(cmd.error.toLocaleString())
-    } if (cmd.output)
-        console.log(cmd.output[1].toLocaleString())
+    if (cmd.output)
+        cmd.output.forEach(e => e && console.log(e.toLocaleString()))
     let response = selectResponse(status ? "negative" : "positive");
     console.log(substituteValues(response));
 }
