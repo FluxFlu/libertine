@@ -67,21 +67,28 @@ function sendResponse(message) {
     console.log(substituteValues(response));
 }
 
+function cleanup(error) {
+    sendResponse(error)
+    process.exit(0);
+}
+
 function runCommand(command, args) {
     
     const cmd = child_process.spawn(command, args, { shell: true, windowsHide: true });
     let fallbackError = 0;
 
     const kill = () => {
+        cmd.removeAllListeners();
+        process.removeAllListeners();
         cmd.stdin.destroy();
         cmd.stdout.destroy();
         cmd.stderr.destroy();
         if (process.platform == "win32")
-            child_process.exec('taskkill /pid ' + cmd.pid + ' /T /F');
-        else
+            child_process.exec('taskkill /pid ' + cmd.pid + ' /T /F', () => cleanup(fallbackError));
+        else {
             cmd.kill("SIGKILL");
-        sendResponse(fallbackError)
-        // process.exit(0);
+            cleanup(fallbackError);
+        }
     }
 
     cmd.stdout.on("data", message => {
@@ -97,7 +104,7 @@ function runCommand(command, args) {
         sendResponse(message);
     });
 
-    process.on("beforeExit", kill);
+    // process.on("beforeExit", kill);
     process.on("exit", kill);
     process.on("SIGINT", kill);
     process.on("SIGUSR1", kill);
