@@ -21,6 +21,7 @@
 const child_process = require("node:child_process");
 const fs = require("fs");
 const path = require("path");
+const { finished } = require("node:stream");
 
 const readJson = filename => JSON.parse(fs.readFileSync(path.join(__dirname, filename + ".json"), "utf-8"));
 
@@ -58,8 +59,30 @@ function substituteValues(response) {
     )
 }
 
+let responseSent = false;
+function sendResponse(message) {
+    if (responseSent) return;
+    responseSent = true;
+    let response = selectResponse(+message.toString() ? "negative" : "positive");
+    console.log(substituteValues(response));
+}
+
 function runCommand(command, args) {
+    
     const cmd = child_process.spawn(command, args, { shell: true, windowsHide: true });
+    let fallbackError = 0;
+
+    const kill = () => {
+        cmd.stdin.destroy();
+        cmd.stdout.destroy();
+        cmd.stderr.destroy();
+        if (process.platform == "win32")
+            child_process.exec('taskkill /pid ' + cmd.pid + ' /T /F');
+        else
+            cmd.kill("SIGKILL");
+        sendResponse(fallbackError)
+        // process.exit(0);
+    }
 
     cmd.stdout.on("data", message => {
         console.log(message.toLocaleString());
@@ -67,12 +90,18 @@ function runCommand(command, args) {
 
     cmd.stderr.on("data", message => {
         console.log(message.toLocaleString());
+        fallbackError = 1;
     })
 
     cmd.addListener("close", message => {
-        let response = selectResponse(+message.toString() ? "negative" : "positive");
-        console.log(substituteValues(response));
+        sendResponse(message);
     });
+
+    process.on("beforeExit", kill);
+    process.on("exit", kill);
+    process.on("SIGINT", kill);
+    process.on("SIGUSR1", kill);
+    process.on("uncaughtException", kill);
 }
 
 function displayHelp() {
