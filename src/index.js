@@ -64,7 +64,7 @@ function sendResponse(message) {
     if (responseSent) return;
     responseSent = true;
     let response = selectResponse(+message.toString() ? "negative" : "positive");
-    console.log(substituteValues(response));
+    console.log('\n' + substituteValues(response));
 }
 
 function cleanup(error) {
@@ -73,16 +73,27 @@ function cleanup(error) {
 }
 
 function runCommand(command, args) {
-    
-    const cmd = child_process.spawn(command, args, { shell: true, windowsHide: true });
+
+    const cmd = child_process.spawn(command, args, {
+        shell: true,
+        windowsHide: true,
+        stdio: [
+            'inherit',
+            'overlapped',
+            'overlapped'
+        ]
+    });
     let fallbackError = 0;
 
     const kill = () => {
         cmd.removeAllListeners();
         process.removeAllListeners();
-        cmd.stdin.destroy();
-        cmd.stdout.destroy();
-        cmd.stderr.destroy();
+        if (cmd.stdin)
+            cmd.stdin.destroy();
+        if (cmd.stdout)
+            cmd.stdout.destroy();
+        if (cmd.stderr)
+            cmd.stderr.destroy();
         if (process.platform == "win32")
             child_process.exec('taskkill /pid ' + cmd.pid + ' /T /F', () => cleanup(fallbackError));
         else {
@@ -92,11 +103,11 @@ function runCommand(command, args) {
     }
 
     cmd.stdout.on("data", message => {
-        console.log(message.toLocaleString());
+        process.stdout.write(message.toLocaleString());
     })
 
     cmd.stderr.on("data", message => {
-        console.log(message.toLocaleString());
+        process.stderr.write(message.toLocaleString());
         fallbackError = 1;
     })
 
