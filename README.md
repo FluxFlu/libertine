@@ -1,5 +1,8 @@
 # libertine
 
+![Endpoint Badge](https://img.shields.io/npm/dt/libertine)
+![Static Badge](https://img.shields.io/badge/License-GPL--3.0-blue)
+
 Mommy's here to support you when running... Everything? ❤️
 
 Based on [cargo-mommy](https://github.com/Gankra/cargo-mommy).
